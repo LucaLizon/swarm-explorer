@@ -5,7 +5,8 @@ en simulation. Objectif : portfolio pour des startups drones / robotique / spati
 
 ## Stack (versions figées)
 - Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic, PX4 SITL (gz_x500), Micro XRCE-DDS Agent v2.4.3
-- px4_msgs doit correspondre à la version de PX4 utilisée (à figer via un fichier .repos)
+- PX4-Autopilot sur `main` au commit e1c28e2755 (v1.18.0-beta1 + 995), pas sur une release : ne pas le mettre à jour sans refiger px4_msgs
+- px4_msgs figé dans `dependencies.repos` (commit 7f7ebd2, généré depuis PX4 1a3f797, messages identiques à e1c28e2755)
 - C++17 (nœuds principaux), Python (scripts, launch)
 
 ## Conventions
@@ -16,7 +17,17 @@ en simulation. Objectif : portfolio pour des startups drones / robotique / spati
 - NAV_DLL_ACT=0 uniquement en simulation (pas de station sol)
 - Conventional Commits, commits petits et logiques
 
+## Organisation du dépôt
+- La racine du dépôt est le workspace colcon ; le code est dans `src/`
+- Dépendances externes : `vcs import src < dependencies.repos` (clonées dans `src/external/`, ignorées par git)
+- Compilation : `colcon build` à la racine, puis `source install/setup.bash` dans chaque terminal
+- Licence Apache-2.0
+
 # État actuel
 - Environnement validé : PX4 SITL + Gazebo, pont XRCE-DDS, exemple offboard de px4_ros_com fonctionnel
-- Prochaine étape (M1) : écrire mon propre nœud dans swarm_control (lecture de la position,
-  machine à états décollage → carré de waypoints → atterrissage)
+- Fait : px4_msgs figé et compilé dans le workspace ; paquet `swarm_control` créé (ament_cmake,
+  dépend de rclcpp et px4_msgs), exécutable `offboard_control` encore au stade « hello world »
+- En cours (M1) : `offboard_control` = nœud qui lit la position, puis machine à états
+  décollage → carré de waypoints → atterrissage en mode offboard
+  1. abonnement à la position et affichage (valide le nom du topic et la QoS)
+  2. machine à états

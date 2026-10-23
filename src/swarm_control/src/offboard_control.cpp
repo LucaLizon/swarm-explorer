@@ -1,10 +1,20 @@
-#include <cstdio>
+#include "rclcpp/rclcpp.hpp"
+#include <memory>
+#include "px4_msgs/msg/vehicle_local_position.hpp"
 
-int main(int argc, char ** argv)
-{
-  (void) argc;
-  (void) argv;
+class OffboardControl : public rclcpp::Node {
+public:
+    OffboardControl() : Node("OffboardControl") {
 
-  printf("hello world swarm_control package\n");
-  return 0;
+    }
+
+private: 
+    std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>> position_sub;
+};
+
+int main(int argc, char * argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<OffboardControl>());
+    rclcpp::shutdown();
+    return 0;
 }

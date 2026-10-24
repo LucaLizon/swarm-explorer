@@ -1,7 +1,10 @@
 # swarm-explorer
 
-Projet personnel : exploration autonome d'environnements intérieurs sans GPS par un essaim de drones,
-en simulation. Objectif : portfolio pour des startups drones / robotique / spatial.
+Projet personnel : exploration en extérieur d'une zone définie par un essaim hétérogène de drones
+(multirotors et voilures fixes), en simulation : couverture de zone, identification. Applications à préciser.
+Plus tard : interface sol modulable (définition des objectifs, coordination de l'essaim), que je conçois moi-même ;
+puis capacité à poursuivre la mission sans GPS (GPS-denied).
+Objectif : portfolio pour des startups drones / robotique / spatial.
 
 ## Stack (versions figées)
 - Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic, PX4 SITL (gz_x500), Micro XRCE-DDS Agent v2.4.3

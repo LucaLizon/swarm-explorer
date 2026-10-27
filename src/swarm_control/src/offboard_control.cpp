@@ -28,7 +28,10 @@ private:
         position_z_ = msg->z;
 
         xy_valid_ = msg->xy_valid;
-        z_valid_ = msg->z_valid; 
+        z_valid_ = msg->z_valid;
+
+        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", position_x_, position_y_, position_z_, xy_valid_, z_valid_);
+
     }
 };
 

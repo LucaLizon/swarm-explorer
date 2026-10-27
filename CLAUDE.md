@@ -28,9 +28,9 @@ Objectif : portfolio pour des startups drones / robotique / spatial.
 
 # État actuel
 - Environnement validé : PX4 SITL + Gazebo, pont XRCE-DDS, exemple offboard de px4_ros_com fonctionnel
-- Fait : px4_msgs figé et compilé dans le workspace ; paquet `swarm_control` créé (ament_cmake,
-  dépend de rclcpp et px4_msgs), exécutable `offboard_control` encore au stade « hello world »
-- En cours (M1) : `offboard_control` = nœud qui lit la position, puis machine à états
-  décollage → carré de waypoints → atterrissage en mode offboard
-  1. abonnement à la position et affichage (valide le nom du topic et la QoS)
-  2. machine à états
+- Fait : px4_msgs figé et compilé dans le workspace ; package `swarm_control` créé (ament_cmake,
+  dépend de rclcpp et px4_msgs) ; README ; doc d'architecture (`docs/architecture.md`)
+- En cours (M1) : node `offboard_control`, machine à états décollage → carré de waypoints → atterrissage
+  en mode offboard (x500)
+  1. fait : subscription à `/fmu/out/vehicle_local_position_v1` (SensorDataQoS), position copiée dans des membres
+  2. en cours : machine à états (conception, puis code)

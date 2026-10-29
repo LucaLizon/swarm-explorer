@@ -18,6 +18,7 @@ public:
             [this](px4_msgs::msg::VehicleLocalPosition::SharedPtr msg){on_position(msg);}
         );
 
+
         //Publisher Topics
         offboard_control_mode_pub_ = this->create_publisher<px4_msgs::msg::OffboardControlMode>(
             "/fmu/in/offboard_control_mode", 10
@@ -28,14 +29,17 @@ public:
         vehicle_command_pub_ = this->create_publisher<px4_msgs::msg::VehicleCommand>(
             "/fmu/in/vehicle_command", 10
         );
+
+        //Timer
+        timer_ = this->create_wall_timer( 
+            100ms, 
+            [this](){this->timer_callback();}
+        );
     }
 
-private: 
+private:
+    //Subscribtion  
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>> position_sub_;
-
-    std::shared_ptr<rclcpp::Publisher<px4_msgs::msg::OffboardControlMode>> offboard_control_mode_pub_;
-    std::shared_ptr<rclcpp::Publisher<px4_msgs::msg::TrajectorySetpoint>> trajectory_setpoint_pub_;
-    std::shared_ptr<rclcpp::Publisher<px4_msgs::msg::VehicleCommand>> vehicle_command_pub_;
 
     float position_x_;
     float position_y_;
@@ -53,7 +57,29 @@ private:
         z_valid_ = msg->z_valid;
 
         RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", position_x_, position_y_, position_z_, xy_valid_, z_valid_);
+    }
 
+    //Publsisher
+    std::shared_ptr<rclcpp::Publisher<px4_msgs::msg::OffboardControlMode>> offboard_control_mode_pub_;
+    std::shared_ptr<rclcpp::Publisher<px4_msgs::msg::TrajectorySetpoint>> trajectory_setpoint_pub_;
+    std::shared_ptr<rclcpp::Publisher<px4_msgs::msg::VehicleCommand>> vehicle_command_pub_;
+
+    //Timer
+    rclcpp::TimerBase::SharedPtr timer_;
+
+    void timer_callback(){
+        px4_msgs::msg::OffboardControlMode msg{};
+
+        msg.position = true;
+        msg.velocity = false;
+        msg.acceleration = false;
+        msg.attitude = false;
+        msg.body_rate = false;
+        msg.thrust_and_torque = false;
+        msg.direct_actuator = false;
+        msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+
+        offboard_control_mode_pub_->publish(msg);
     }
 };
 

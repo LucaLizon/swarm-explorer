@@ -68,18 +68,33 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 
     void timer_callback(){
-        px4_msgs::msg::OffboardControlMode msg{};
 
-        msg.position = true;
-        msg.velocity = false;
-        msg.acceleration = false;
-        msg.attitude = false;
-        msg.body_rate = false;
-        msg.thrust_and_torque = false;
-        msg.direct_actuator = false;
-        msg.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+        //OffboardControlMode
+        px4_msgs::msg::OffboardControlMode msg_offboard_ctrl_{};
 
-        offboard_control_mode_pub_->publish(msg);
+        msg_offboard_ctrl_.position = true;
+        msg_offboard_ctrl_.velocity = false;
+        msg_offboard_ctrl_.acceleration = false;
+        msg_offboard_ctrl_.attitude = false;
+        msg_offboard_ctrl_.body_rate = false;
+        msg_offboard_ctrl_.thrust_and_torque = false;
+        msg_offboard_ctrl_.direct_actuator = false;
+        msg_offboard_ctrl_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+
+        offboard_control_mode_pub_->publish(msg_offboard_ctrl_);
+
+        //TrajectorySetpoint
+        px4_msgs::msg::TrajectorySetpoint msg_trajectory_set_point_{};
+
+        msg_trajectory_set_point_.position = {0.0, 0.0, -5.0};
+	    msg_trajectory_set_point_.yaw = -3.14; // [-PI:PI]        
+        msg_offboard_ctrl_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+
+        trajectory_setpoint_pub_->publish(msg_trajectory_set_point_);
+
+        //Vehicle Command
+        
+
     }
 };
 

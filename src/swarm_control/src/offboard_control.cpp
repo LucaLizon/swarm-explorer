@@ -2,6 +2,7 @@
 #include <memory>
 #include "px4_msgs/msg/vehicle_local_position.hpp"
 #include <chrono>
+#include <limits> //Pour pouvoir ecrire std::numeric_limits<TypeName>::quiet_NaN() ¡¡Attention, TypeName a modifier dutant lecriture!!
 #include "px4_msgs/msg/offboard_control_mode.hpp"
 #include "px4_msgs/msg/trajectory_setpoint.hpp"
 #include "px4_msgs/msg/vehicle_command.hpp"
@@ -48,6 +49,9 @@ private:
     bool xy_valid_;
     bool z_valid_;
 
+    //Mini timer pour VehicleCommand
+    int compteur_pour_vehicle_command = 0;
+
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
         position_x_ = msg->x;
         position_y_ = msg->y;
@@ -88,13 +92,33 @@ private:
 
         msg_trajectory_set_point_.position = {0.0, 0.0, -5.0};
 	    msg_trajectory_set_point_.yaw = -3.14; // [-PI:PI]        
-        msg_offboard_ctrl_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+        msg_trajectory_set_point_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 
         trajectory_setpoint_pub_->publish(msg_trajectory_set_point_);
 
-        //Vehicle Command
-        
+        //Vehicle Command - Appel avec methodes
+        this->compteur_pour_vehicle_command ++;
 
+        if(this->compteur_pour_vehicle_command == 10) {
+            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+        }
+        if(this->compteur_pour_vehicle_command == 12) {
+            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
+        }
+    }
+
+    void publish_vehicle_command(uint16_t command, float param1, float param2 = 0.0){
+        px4_msgs::msg::VehicleCommand msg_vehicle_command_{};
+        msg_vehicle_command_.param1 = param1;
+        msg_vehicle_command_.param2 = param2;
+        msg_vehicle_command_.command = command;
+        msg_vehicle_command_.target_system = 1; 
+        msg_vehicle_command_.target_component = 1;
+        msg_vehicle_command_.source_system = 1;
+        msg_vehicle_command_.source_component = 1;
+        msg_vehicle_command_.from_external = true;
+        msg_vehicle_command_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+        vehicle_command_pub_->publish(msg_vehicle_command_);
     }
 };
 

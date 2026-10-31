@@ -50,7 +50,7 @@ private:
     bool z_valid_;
 
     //Mini timer pour VehicleCommand
-    int compteur_pour_vehicle_command = 0;
+    int ticker_for_vehicle_command = 0;
 
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
         position_x_ = msg->x;
@@ -74,51 +74,51 @@ private:
     void timer_callback(){
 
         //OffboardControlMode
-        px4_msgs::msg::OffboardControlMode msg_offboard_ctrl_{};
+        px4_msgs::msg::OffboardControlMode msg_offboard_ctrl{};
 
-        msg_offboard_ctrl_.position = true;
-        msg_offboard_ctrl_.velocity = false;
-        msg_offboard_ctrl_.acceleration = false;
-        msg_offboard_ctrl_.attitude = false;
-        msg_offboard_ctrl_.body_rate = false;
-        msg_offboard_ctrl_.thrust_and_torque = false;
-        msg_offboard_ctrl_.direct_actuator = false;
-        msg_offboard_ctrl_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+        msg_offboard_ctrl.position = true;
+        msg_offboard_ctrl.velocity = false;
+        msg_offboard_ctrl.acceleration = false;
+        msg_offboard_ctrl.attitude = false;
+        msg_offboard_ctrl.body_rate = false;
+        msg_offboard_ctrl.thrust_and_torque = false;
+        msg_offboard_ctrl.direct_actuator = false;
+        msg_offboard_ctrl.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 
-        offboard_control_mode_pub_->publish(msg_offboard_ctrl_);
+        offboard_control_mode_pub_->publish(msg_offboard_ctrl);
 
         //TrajectorySetpoint
-        px4_msgs::msg::TrajectorySetpoint msg_trajectory_set_point_{};
+        px4_msgs::msg::TrajectorySetpoint msg_trajectory_set_point{};
 
-        msg_trajectory_set_point_.position = {0.0, 0.0, -5.0};
-	    msg_trajectory_set_point_.yaw = -3.14; // [-PI:PI]        
-        msg_trajectory_set_point_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+        msg_trajectory_set_point.position = {0.0, 0.0, -5.0};
+	    msg_trajectory_set_point.yaw = -3.14; // [-PI:PI]        
+        msg_trajectory_set_point.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 
-        trajectory_setpoint_pub_->publish(msg_trajectory_set_point_);
+        trajectory_setpoint_pub_->publish(msg_trajectory_set_point);
 
         //Vehicle Command - Appel avec methodes
-        this->compteur_pour_vehicle_command ++;
+        this->ticker_for_vehicle_command ++;
 
-        if(this->compteur_pour_vehicle_command == 10) {
+        if(this->ticker_for_vehicle_command == 10) {
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
         }
-        if(this->compteur_pour_vehicle_command == 12) {
+        if(this->ticker_for_vehicle_command == 12) {
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
         }
     }
 
     void publish_vehicle_command(uint16_t command, float param1, float param2 = 0.0){
-        px4_msgs::msg::VehicleCommand msg_vehicle_command_{};
-        msg_vehicle_command_.param1 = param1;
-        msg_vehicle_command_.param2 = param2;
-        msg_vehicle_command_.command = command;
-        msg_vehicle_command_.target_system = 1; 
-        msg_vehicle_command_.target_component = 1;
-        msg_vehicle_command_.source_system = 1;
-        msg_vehicle_command_.source_component = 1;
-        msg_vehicle_command_.from_external = true;
-        msg_vehicle_command_.timestamp = this->get_clock()->now().nanoseconds() / 1000;
-        vehicle_command_pub_->publish(msg_vehicle_command_);
+        px4_msgs::msg::VehicleCommand msg_vehicle_command{};
+        msg_vehicle_command.param1 = param1;
+        msg_vehicle_command.param2 = param2;
+        msg_vehicle_command.command = command;
+        msg_vehicle_command.target_system = 1; 
+        msg_vehicle_command.target_component = 1;
+        msg_vehicle_command.source_system = 1;
+        msg_vehicle_command.source_component = 1;
+        msg_vehicle_command.from_external = true;
+        msg_vehicle_command.timestamp = this->get_clock()->now().nanoseconds() / 1000;
+        vehicle_command_pub_->publish(msg_vehicle_command);
     }
 };
 

@@ -33,4 +33,6 @@ Objectif : portfolio pour des startups drones / robotique / spatial.
 - En cours (M1) : node `offboard_control`, machine à états décollage → carré de waypoints → atterrissage
   en mode offboard (x500)
   1. fait : subscription à `/fmu/out/vehicle_local_position_v1` (SensorDataQoS), position copiée dans des membres
-  2. en cours : machine à états (conception, puis code)
+  2. fait : 3 publishers `/fmu/in`, timer à 10 Hz, passage en offboard et armement ; le drone décolle à 5 m et y reste
+  3. en cours : machine à états, classe `FlightFsm` sans dépendance ROS 2 (`flight_fsm.hpp/.cpp`, membre direct de la node) ;
+     décidé : tolérance d'arrivée 0,5 m (à ajuster), retour à la position de départ avant l'atterrissage

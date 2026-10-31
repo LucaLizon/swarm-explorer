@@ -50,7 +50,7 @@ private:
     bool z_valid_;
 
     //Mini timer pour VehicleCommand
-    int ticker_for_vehicle_command = 0;
+    int ticker_for_vehicle_command_ = 0;
 
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
         position_x_ = msg->x;
@@ -97,12 +97,12 @@ private:
         trajectory_setpoint_pub_->publish(msg_trajectory_set_point);
 
         //Vehicle Command - Appel avec methodes
-        this->ticker_for_vehicle_command ++;
+        this->ticker_for_vehicle_command_ ++;
 
-        if(this->ticker_for_vehicle_command == 10) {
+        if(this->ticker_for_vehicle_command_ == 10) {
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
         }
-        if(this->ticker_for_vehicle_command == 12) {
+        if(this->ticker_for_vehicle_command_ == 12) {
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
         }
     }

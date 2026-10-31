@@ -1,11 +1,12 @@
 #include "rclcpp/rclcpp.hpp"
 #include <memory>
-#include "px4_msgs/msg/vehicle_local_position.hpp"
 #include <chrono>
 #include <limits> //Pour pouvoir ecrire std::numeric_limits<TypeName>::quiet_NaN() ¡¡Attention, TypeName a modifier dutant lecriture!!
+#include "px4_msgs/msg/vehicle_local_position.hpp"
 #include "px4_msgs/msg/offboard_control_mode.hpp"
 #include "px4_msgs/msg/trajectory_setpoint.hpp"
 #include "px4_msgs/msg/vehicle_command.hpp"
+#include "swarm_control/flight_fsm.hpp"
 
 using namespace std::chrono_literals;
 

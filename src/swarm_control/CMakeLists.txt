@@ -10,7 +10,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 
-add_executable(offboard_control src/offboard_control.cpp)
+add_executable(offboard_control 
+  src/offboard_control.cpp 
+  src/flight_fsm.cpp
+  )
 target_include_directories(offboard_control PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)

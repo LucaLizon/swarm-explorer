@@ -40,28 +40,18 @@ public:
     }
 
 private:
+    //Pointeur vers objet FSM
+    FSM fsm{};
+
     //Subscribtion  
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>> position_sub_;
-
-    float position_x_;
-    float position_y_;
-    float position_z_;
-
-    bool xy_valid_;
-    bool z_valid_;
 
     //Mini timer pour VehicleCommand
     int ticker_for_vehicle_command_ = 0;
 
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
-        position_x_ = msg->x;
-        position_y_ = msg->y;
-        position_z_ = msg->z;
-
-        xy_valid_ = msg->xy_valid;
-        z_valid_ = msg->z_valid;
-
-        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", position_x_, position_y_, position_z_, xy_valid_, z_valid_);
+        fsm.set_xyz_xyz_valid(msg->x, msg->y,msg->z, msg->xy_valid,  msg->z_valid);
+        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", msg->x, msg->y, msg->z, msg->xy_valid, msg->z_valid);
     }
 
     //Publsisher

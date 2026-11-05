@@ -12,7 +12,7 @@ using namespace std::chrono_literals;
 
 class OffboardControl : public rclcpp::Node {
 public:
-    OffboardControl() : Node("offboard_control"),  position_x_(0), position_y_(0), position_z_(0), xy_valid_(false), z_valid_(false){
+    OffboardControl() : Node("offboard_control") {
         //Subscriber Topic
         position_sub_ = this->create_subscription<px4_msgs::msg::VehicleLocalPosition>(
             "/fmu/out/vehicle_local_position_v1",
@@ -46,9 +46,6 @@ private:
     //Subscribtion  
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>> position_sub_;
 
-    //Mini timer pour VehicleCommand
-    int ticker_for_vehicle_command_ = 0;
-
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
         fsm.set_xyz_xyz_valid(msg->x, msg->y,msg->z, msg->xy_valid,  msg->z_valid);
         RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", msg->x, msg->y, msg->z, msg->xy_valid, msg->z_valid);
@@ -63,7 +60,44 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 
     void timer_callback(){
+        //OffboardControlMode
+        publish_offboard_control_mode();
 
+        //Gestion de la FSM
+        if(fsm.get_current_state() == DroneState::MESSAGING) {
+            publish_trajectory_set_point();
+        }
+
+        if(fsm.get_current_state() == DroneState::COMMAND1) {
+            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+            publish_trajectory_set_point();
+        }
+
+        if(fsm.get_current_state() == DroneState::COMMAND2) {
+            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
+            publish_trajectory_set_point();
+        }
+
+        if(fsm.get_current_state() == DroneState::CORNER1) {
+            publish_trajectory_set_point(10, 0, -5);
+        }
+
+        if(fsm.get_current_state() == DroneState::CORNER2) {
+            publish_trajectory_set_point(10, 10, -5);
+        }
+
+        if(fsm.get_current_state() == DroneState::CORNER3) {
+            publish_trajectory_set_point(0, 10, -5);
+        }
+
+        if(fsm.get_current_state() == DroneState::LAND) {
+            publish_trajectory_set_point(0, 0, -5);
+        }
+
+        fsm.changer_etat();
+    }
+
+    void publish_offboard_control_mode() {
         //OffboardControlMode
         px4_msgs::msg::OffboardControlMode msg_offboard_ctrl{};
 
@@ -77,25 +111,17 @@ private:
         msg_offboard_ctrl.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 
         offboard_control_mode_pub_->publish(msg_offboard_ctrl);
+    }
 
+    void publish_trajectory_set_point(float x = 0, float y = 0, float z = -5, float yaw = 0) {
         //TrajectorySetpoint
         px4_msgs::msg::TrajectorySetpoint msg_trajectory_set_point{};
 
-        msg_trajectory_set_point.position = {0.0, 0.0, -5.0};
-	    msg_trajectory_set_point.yaw = -3.14; // [-PI:PI]        
+        msg_trajectory_set_point.position = {x, y, z};
+	    msg_trajectory_set_point.yaw = yaw; // [-PI:PI]        
         msg_trajectory_set_point.timestamp = this->get_clock()->now().nanoseconds() / 1000;
 
         trajectory_setpoint_pub_->publish(msg_trajectory_set_point);
-
-        //Vehicle Command - Appel avec methodes
-        this->ticker_for_vehicle_command_ ++;
-
-        if(this->ticker_for_vehicle_command_ == 10) {
-            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
-        }
-        if(this->ticker_for_vehicle_command_ == 12) {
-            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
-        }
     }
 
     void publish_vehicle_command(uint16_t command, float param1, float param2 = 0.0){

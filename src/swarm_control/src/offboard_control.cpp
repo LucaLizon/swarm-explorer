@@ -20,7 +20,6 @@ public:
             [this](px4_msgs::msg::VehicleLocalPosition::SharedPtr msg){on_position(msg);}
         );
 
-
         //Publisher Topics
         offboard_control_mode_pub_ = this->create_publisher<px4_msgs::msg::OffboardControlMode>(
             "/fmu/in/offboard_control_mode", 10
@@ -41,13 +40,13 @@ public:
 
 private:
     //Pointeur vers objet FSM
-    FSM fsm{};
+    FSM fsm_{};
 
     //Subscribtion  
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>> position_sub_;
 
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
-        fsm.set_xyz_xyz_valid(msg->x, msg->y,msg->z, msg->xy_valid,  msg->z_valid);
+        fsm_.set_xyz_xyz_valid(msg->x, msg->y,msg->z, msg->xy_valid,  msg->z_valid);
         RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", msg->x, msg->y, msg->z, msg->xy_valid, msg->z_valid);
     }
 
@@ -64,37 +63,37 @@ private:
         publish_offboard_control_mode();
 
         //Gestion de la FSM
-        if(fsm.get_current_state() == DroneState::MESSAGING) {
+        if(fsm_.get_current_state() == DroneState::MESSAGING) {
             publish_trajectory_set_point();
         }
 
-        if(fsm.get_current_state() == DroneState::COMMAND1) {
+        if(fsm_.get_current_state() == DroneState::COMMAND1) {
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
             publish_trajectory_set_point();
         }
 
-        if(fsm.get_current_state() == DroneState::COMMAND2) {
+        if(fsm_.get_current_state() == DroneState::COMMAND2) {
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
             publish_trajectory_set_point();
         }
 
-        if(fsm.get_current_state() == DroneState::CORNER1) {
+        if(fsm_.get_current_state() == DroneState::CORNER1) {
             publish_trajectory_set_point(10, 0, -5);
         }
 
-        if(fsm.get_current_state() == DroneState::CORNER2) {
+        if(fsm_.get_current_state() == DroneState::CORNER2) {
             publish_trajectory_set_point(10, 10, -5);
         }
 
-        if(fsm.get_current_state() == DroneState::CORNER3) {
+        if(fsm_.get_current_state() == DroneState::CORNER3) {
             publish_trajectory_set_point(0, 10, -5);
         }
 
-        if(fsm.get_current_state() == DroneState::LAND) {
+        if(fsm_.get_current_state() == DroneState::LAND) {
             publish_trajectory_set_point(0, 0, -5);
         }
 
-        fsm.changer_etat();
+        fsm_.changer_etat();
     }
 
     void publish_offboard_control_mode() {

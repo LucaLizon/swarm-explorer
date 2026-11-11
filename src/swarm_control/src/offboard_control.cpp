@@ -85,7 +85,7 @@ private:
     }
 
     void on_land_detection(px4_msgs::msg::VehicleLandDetected::SharedPtr msg) {
-        fsm_.set_landing_confirmed(msg->landed)
+        fsm_.set_landing_confirmed(msg->landed);
     }
 
     //Publsisher

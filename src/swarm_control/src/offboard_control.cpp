@@ -6,6 +6,9 @@
 #include "px4_msgs/msg/offboard_control_mode.hpp"
 #include "px4_msgs/msg/trajectory_setpoint.hpp"
 #include "px4_msgs/msg/vehicle_command.hpp"
+#include "px4_msgs/msg/vehicle_status.hpp"
+#include "px4_msgs/msg/vehicle_command_ack.hpp"
+#include "px4_msgs/msg/vehicle_land_detected.hpp"
 #include "swarm_control/flight_fsm.hpp"
 
 using namespace std::chrono_literals;
@@ -14,10 +17,29 @@ class OffboardControl : public rclcpp::Node {
 public:
     OffboardControl() : Node("offboard_control") {
         //Subscriber Topic
+        //vehicle_local_position_v1
         position_sub_ = this->create_subscription<px4_msgs::msg::VehicleLocalPosition>(
             "/fmu/out/vehicle_local_position_v1",
             rclcpp::SensorDataQoS(),
             [this](px4_msgs::msg::VehicleLocalPosition::SharedPtr msg){on_position(msg);}
+        );
+        //vehicle_status_v4
+        status_sub_ = this->create_subscription<px4_msgs::msg::VehicleStatus>(
+            "/fmu/out/vehicle_status_v4",
+            rclcpp::SensorDataQoS(),
+            [this](px4_msgs::msg::VehicleStatus::SharedPtr msg){on_status(msg);}
+        );
+        //vehicle_command_ack_v1
+        command_ack_sub_ = this->create_subscription<px4_msgs::msg::VehicleCommandAck>(
+            "/fmu/out/vehicle_command_ack_v1",
+            rclcpp::SensorDataQoS(),
+            [this](px4_msgs::msg::VehicleCommandAck::SharedPtr msg){on_ack(msg);}
+        );
+        //vehicle_land_detected
+        land_detection_sub_ = this->create_subscription<px4_msgs::msg::VehicleLandDetected>(
+            "/fmu/out/vehicle_land_detected",
+            rclcpp::SensorDataQoS(),
+            [this](px4_msgs::msg::VehicleLandDetected::SharedPtr msg){on_land_detection(msg);}
         );
 
         //Publisher Topics
@@ -44,10 +66,26 @@ private:
 
     //Subscribtion  
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>> position_sub_;
+    std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleStatus>> status_sub_;
+    std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleCommandAck>> command_ack_sub_;
+    std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLandDetected>> land_detection_sub_;
 
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
         fsm_.set_xyz_xyz_valid(msg->x, msg->y,msg->z, msg->xy_valid,  msg->z_valid);
         RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "position_x_ %f	position_y_ %f	position_z_ %f	xy_valid_ %d z_valid_ %d", msg->x, msg->y, msg->z, msg->xy_valid, msg->z_valid);
+    }
+
+    void on_status(px4_msgs::msg::VehicleStatus::SharedPtr msg) {
+        fsm_.set_nav_state(msg->nav_state);
+        fsm_.set_arm_state(msg->arming_state);
+    }
+
+    void on_ack(px4_msgs::msg::VehicleCommandAck::SharedPtr msg) {
+        fsm_.set_command_acceptance_status(msg->result);
+    }
+
+    void on_land_detection(px4_msgs::msg::VehicleLandDetected::SharedPtr msg) {
+        fsm_.set_landing_confirmed(msg->landed)
     }
 
     //Publsisher

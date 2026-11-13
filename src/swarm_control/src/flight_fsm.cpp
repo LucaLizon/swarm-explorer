@@ -48,14 +48,16 @@ void FSM::change_from_MESSAGING() {
 }
 
 void FSM::change_from_COMMAND1() {
-    ticker_for_vehicle_command_ ++;
-    if(ticker_for_vehicle_command_ == 12) {
+    //ATTENTION : ici le 14 brepresente la valeur associee a px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD a cahnger plus tard
+    if(nav_state_ == 14) {
         current_state_ = DroneState::COMMAND2;
     }
 }
 
 void FSM::change_from_COMMAND2() {
-    current_state_ = DroneState::CORNER1;
+    if(arm_state_ == 2) {
+        current_state_ = DroneState::CORNER1;
+    }
 }
 
 void FSM::change_from_CORNER1() {

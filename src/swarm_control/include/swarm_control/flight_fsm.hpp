@@ -1,7 +1,7 @@
 #pragma once // VITAL
 #include <stdint.h>
 
-enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, LAND};
+enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, CORNER4, LAND};
 
 class FSM {
 private:
@@ -21,7 +21,7 @@ private:
 
     bool landing_confirmed_;
 
-    int ticker_for_vehicle_command_ = 0;
+    bool not_ready_for_offboard_mode_;
 
 public:
 
@@ -37,6 +37,7 @@ public:
     void set_arm_state(uint8_t b) {arm_state_ = b;}
     void set_command_acceptance_status(uint8_t c) {command_acceptance_status_ = c;}
     void set_landing_confirmed(bool d) {landing_confirmed_ = d;}
+    void set_not_ready_for_offboard_mode_(bool e) {not_ready_for_offboard_mode_ = e;}
 
 
     void change_from_MESSAGING();
@@ -45,5 +46,5 @@ public:
     void change_from_CORNER1();
     void change_from_CORNER2();
     void change_from_CORNER3();
-
+    void change_from_CORNER4();
 };

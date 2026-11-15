@@ -9,6 +9,7 @@
 #include "px4_msgs/msg/vehicle_status.hpp"
 #include "px4_msgs/msg/vehicle_command_ack.hpp"
 #include "px4_msgs/msg/vehicle_land_detected.hpp"
+#include "px4_msgs/msg/failsafe_flags.hpp"
 #include "swarm_control/flight_fsm.hpp"
 
 using namespace std::chrono_literals;
@@ -41,7 +42,14 @@ public:
             rclcpp::SensorDataQoS(),
             [this](px4_msgs::msg::VehicleLandDetected::SharedPtr msg){on_land_detection(msg);}
         );
+        //failsafe_flags (to go from MESSAGING to COMMAND1)
+        failsafe_flags_sub_ = this->create_subscription<px4_msgs::msg::FailsafeFlags>(
+            "/fmu/out/failsafe_flags",
+            rclcpp::SensorDataQoS(),
+            [this](px4_msgs::msg::FailsafeFlags::SharedPtr msg){on_failsafe_flags(msg);}
+        );
 
+        
         //Publisher Topics
         offboard_control_mode_pub_ = this->create_publisher<px4_msgs::msg::OffboardControlMode>(
             "/fmu/in/offboard_control_mode", 10
@@ -69,6 +77,8 @@ private:
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleStatus>> status_sub_;
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleCommandAck>> command_ack_sub_;
     std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::VehicleLandDetected>> land_detection_sub_;
+    std::shared_ptr<rclcpp::Subscription<px4_msgs::msg::FailsafeFlags>> failsafe_flags_sub_;
+
 
     void on_position(px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
         fsm_.set_xyz_xyz_valid(msg->x, msg->y,msg->z, msg->xy_valid,  msg->z_valid);
@@ -86,6 +96,10 @@ private:
 
     void on_land_detection(px4_msgs::msg::VehicleLandDetected::SharedPtr msg) {
         fsm_.set_landing_confirmed(msg->landed);
+    }
+
+    void on_failsafe_flags(px4_msgs::msg::FailsafeFlags::SharedPtr msg) {
+        fsm_.set_not_ready_for_offboard_mode_(msg->offboard_control_signal_lost);
     }
 
     //Publsisher
@@ -127,8 +141,12 @@ private:
             publish_trajectory_set_point(0, 10, -5);
         }
 
-        if(fsm_.get_current_state() == DroneState::LAND) {
+        if(fsm_.get_current_state() == DroneState::CORNER4) {
             publish_trajectory_set_point(0, 0, -5);
+        }
+
+        if(fsm_.get_current_state() == DroneState::LAND) {
+            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND);
         }
 
         fsm_.changer_etat();
@@ -161,7 +179,7 @@ private:
         trajectory_setpoint_pub_->publish(msg_trajectory_set_point);
     }
 
-    void publish_vehicle_command(uint16_t command, float param1, float param2 = 0.0){
+    void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0){
         px4_msgs::msg::VehicleCommand msg_vehicle_command{};
         msg_vehicle_command.param1 = param1;
         msg_vehicle_command.param2 = param2;

@@ -115,17 +115,24 @@ private:
         publish_offboard_control_mode();
 
         //Gestion de la FSM
+        
         if(fsm_.get_current_state() == DroneState::MESSAGING) {
             publish_trajectory_set_point();
         }
+        //OneShotEvent
+        if(fsm_.get_ponctual_event() == PonctualEvent::SENDCOMMAND1) {
+                publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
+        }
 
         if(fsm_.get_current_state() == DroneState::COMMAND1) {
-            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
             publish_trajectory_set_point();
+        }
+        //OneShotEvent
+        if(fsm_.get_ponctual_event() == PonctualEvent::SENDCOMMAND2) {
+                publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
         }
 
         if(fsm_.get_current_state() == DroneState::COMMAND2) {
-            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
             publish_trajectory_set_point();
         }
 
@@ -144,9 +151,12 @@ private:
         if(fsm_.get_current_state() == DroneState::CORNER4) {
             publish_trajectory_set_point(0, 0, -5);
         }
+        //OneShotEvent
+        if(fsm_.get_ponctual_event() == PonctualEvent::SENDLAND) {
+                publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND);
+        }
 
         if(fsm_.get_current_state() == DroneState::LAND) {
-            publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND);
         }
 
         fsm_.changer_etat();

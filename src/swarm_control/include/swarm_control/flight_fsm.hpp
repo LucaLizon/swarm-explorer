@@ -2,10 +2,13 @@
 #include <stdint.h>
 
 enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, CORNER4, LAND};
+enum class PonctualEvent{NONE, SENDCOMMAND1, SENDCOMMAND2, SENDLAND};
 
 class FSM {
 private:
     DroneState current_state_;
+
+    PonctualEvent ponctual_event_;
 
     float position_x_;
     float position_y_;
@@ -32,6 +35,8 @@ public:
     void changer_etat();
 
     DroneState get_current_state() const {return current_state_;}
+
+    PonctualEvent get_ponctual_event() {return ponctual_event_;}
 
     void set_nav_state(uint8_t a) {nav_state_ = a;}
     void set_arm_state(uint8_t b) {arm_state_ = b;}

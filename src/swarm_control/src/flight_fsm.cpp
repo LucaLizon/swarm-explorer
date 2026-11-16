@@ -1,6 +1,6 @@
 #include "swarm_control/flight_fsm.hpp"
 
-FSM::FSM() : position_x_(0), position_y_(0), position_z_(0), xy_valid_(0), z_valid_(false), nav_state_(0), arm_state_(0), command_acceptance_status_(0), landing_confirmed_(false), not_ready_for_offboard_mode_(true), current_state_(DroneState::MESSAGING) {}
+FSM::FSM() : position_x_(0), position_y_(0), position_z_(0), xy_valid_(0), z_valid_(false), nav_state_(0), arm_state_(0), command_acceptance_status_(0), landing_confirmed_(false), not_ready_for_offboard_mode_(true), current_state_(DroneState::MESSAGING), ponctual_event_(PonctualEvent::NONE) {}
 
 void FSM::set_xyz_xyz_valid(float a, float b, float c, bool d, bool e) {
         position_x_ = a;
@@ -46,18 +46,22 @@ void FSM::changer_etat() {
 
 void FSM::change_from_MESSAGING() {
     if(!not_ready_for_offboard_mode_) {
+        ponctual_event_ = PonctualEvent::SENDCOMMAND1;
         current_state_ = DroneState::COMMAND1;
     }
 }
 
 void FSM::change_from_COMMAND1() {
+    ponctual_event_ = PonctualEvent::NONE;
     //ATTENTION : ici le 14 represente la valeur associee a px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD a changer plus tard
     if(nav_state_ == 14) {
+        ponctual_event_ = PonctualEvent::SENDCOMMAND2;
         current_state_ = DroneState::COMMAND2;
     }
 }
 
 void FSM::change_from_COMMAND2() {
+    ponctual_event_ = PonctualEvent::NONE;
     if(arm_state_ == 2) {
         current_state_ = DroneState::CORNER1;
     }
@@ -83,6 +87,7 @@ void FSM::change_from_CORNER3() {
 
 void FSM::change_from_CORNER4() {
     if((position_x_ > -1 && position_x_ < 1) && (position_y_ > -1 && position_y_ < 1) && (position_z_ > -6 && position_z_ < -4) && xy_valid_ && z_valid_){
+        ponctual_event_ = PonctualEvent::SENDLAND;
         current_state_ = DroneState::LAND;
     }
 }

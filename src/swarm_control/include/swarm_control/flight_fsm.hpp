@@ -8,7 +8,7 @@ class FSM {
 private:
     DroneState current_state_;
 
-    PonctualEvent ponctual_event_;
+    PonctualEvent one_shot_event_;
 
     float position_x_;
     float position_y_;
@@ -26,6 +26,8 @@ private:
 
     bool not_ready_for_offboard_mode_;
 
+    int counter_;
+
 public:
 
     FSM();
@@ -36,7 +38,7 @@ public:
 
     DroneState get_current_state() const {return current_state_;}
 
-    PonctualEvent get_ponctual_event() {return ponctual_event_;}
+    PonctualEvent get_one_shot_event_() {return one_shot_event_;}
 
     void set_nav_state(uint8_t a) {nav_state_ = a;}
     void set_arm_state(uint8_t b) {arm_state_ = b;}

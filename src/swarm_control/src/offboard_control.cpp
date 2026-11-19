@@ -120,7 +120,7 @@ private:
             publish_trajectory_set_point();
         }
         //OneShotEvent
-        if(fsm_.get_ponctual_event() == PonctualEvent::SENDCOMMAND1) {
+        if(fsm_.get_one_shot_event_() == PonctualEvent::SENDCOMMAND1) {
                 publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
         }
 
@@ -128,7 +128,7 @@ private:
             publish_trajectory_set_point();
         }
         //OneShotEvent
-        if(fsm_.get_ponctual_event() == PonctualEvent::SENDCOMMAND2) {
+        if(fsm_.get_one_shot_event_() == PonctualEvent::SENDCOMMAND2) {
                 publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
         }
 
@@ -152,7 +152,7 @@ private:
             publish_trajectory_set_point(0, 0, -5);
         }
         //OneShotEvent
-        if(fsm_.get_ponctual_event() == PonctualEvent::SENDLAND) {
+        if(fsm_.get_one_shot_event_() == PonctualEvent::SENDLAND) {
                 publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND);
         }
 

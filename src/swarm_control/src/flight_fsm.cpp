@@ -53,6 +53,7 @@ void FSM::change_from_MESSAGING() {
         one_shot_event_ = PonctualEvent::SENDCOMMAND1;
         current_state_ = DroneState::COMMAND1;
         counter_ = 0;
+        command_acceptance_status_ = false;
     } 
 }
 
@@ -65,6 +66,7 @@ void FSM::change_from_COMMAND1() {
         one_shot_event_ = PonctualEvent::SENDCOMMAND2;
         current_state_ = DroneState::COMMAND2;
         counter_ = 0;
+        command_acceptance_status_ = false;
     }
 }
 
@@ -76,6 +78,8 @@ void FSM::change_from_COMMAND2() {
     if(arm_state_armed_) {
         current_state_ = DroneState::CORNER1;
         counter_ = 0;
+        command_acceptance_status_ = false;
+
     }
 }
 

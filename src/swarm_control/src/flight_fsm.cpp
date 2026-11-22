@@ -1,6 +1,6 @@
 #include "swarm_control/flight_fsm.hpp"
 
-FSM::FSM() : current_state_(DroneState::MESSAGING), one_shot_event_(PonctualEvent::NONE), position_x_(0), position_y_(0), position_z_(0), xy_valid_(0), z_valid_(false), nav_state_offboard_(0), arm_state_armed_(0), command_acceptance_status_(0), landing_confirmed_(false), not_ready_for_offboard_mode_(true), counter_(0) {}
+FSM::FSM() : current_state_(DroneState::MESSAGING), comparison_current_state_(DroneState::MESSAGING), one_shot_event_(PonctualEvent::NONE), position_x_(0), position_y_(0), position_z_(0), xy_valid_(0), z_valid_(false), nav_state_offboard_(0), arm_state_armed_(0), command_acceptance_status_(0), landing_confirmed_(false), not_ready_for_offboard_mode_(true), counter_(0) {}
 
 void FSM::set_xyz_xyz_valid(float a, float b, float c, bool d, bool e) {
         position_x_ = a;
@@ -12,6 +12,10 @@ void FSM::set_xyz_xyz_valid(float a, float b, float c, bool d, bool e) {
 
 void FSM::changer_etat() {
     counter_ ++;
+    if (comparison_current_state_ != current_state_) {
+        counter_ == 0;
+        command_acceptance_status_ = false;
+    }
     switch(current_state_) {
         
         case DroneState::MESSAGING :
@@ -45,6 +49,12 @@ void FSM::changer_etat() {
         case DroneState::LAND :
             change_from_LAND();
             break;
+        
+        case DroneState::LANDED :
+            break;
+
+        case DroneState::ERRORBEFORETAKEOFF :
+            break;
     }
 }
 
@@ -52,8 +62,6 @@ void FSM::change_from_MESSAGING() {
     if(!not_ready_for_offboard_mode_) {
         one_shot_event_ = PonctualEvent::SENDCOMMAND1;
         current_state_ = DroneState::COMMAND1;
-        counter_ = 0;
-        command_acceptance_status_ = false;
     } 
 }
 
@@ -65,8 +73,6 @@ void FSM::change_from_COMMAND1() {
     if(nav_state_offboard_) {
         one_shot_event_ = PonctualEvent::SENDCOMMAND2;
         current_state_ = DroneState::COMMAND2;
-        counter_ = 0;
-        command_acceptance_status_ = false;
     }
 }
 
@@ -77,9 +83,6 @@ void FSM::change_from_COMMAND2() {
     }
     if(arm_state_armed_) {
         current_state_ = DroneState::CORNER1;
-        counter_ = 0;
-        command_acceptance_status_ = false;
-
     }
 }
 
@@ -110,4 +113,7 @@ void FSM::change_from_CORNER4() {
 
 void FSM::change_from_LAND() {
         one_shot_event_ = PonctualEvent::NONE;
+        if(landing_confirmed_) {
+            current_state_ = DroneState::LANDED;
+        }
 }

@@ -1,12 +1,13 @@
 #pragma once // VITAL
 #include <stdint.h>
 
-enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, CORNER4, LAND, LANDED};
+enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, CORNER4, LAND, LANDED, ERRORBEFORETAKEOFF};
 enum class PonctualEvent{NONE, SENDCOMMAND1, SENDCOMMAND2, SENDLAND};
 
 class FSM {
 private:
     DroneState current_state_;
+    DroneState comparison_current_state_;
 
     PonctualEvent one_shot_event_;
 

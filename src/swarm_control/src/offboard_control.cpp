@@ -88,14 +88,21 @@ private:
     void on_status(px4_msgs::msg::VehicleStatus::SharedPtr msg) {
         if(msg->nav_state == px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD) {
             fsm_.set_nav_state_offboard(true);
+        } else {
+            fsm_.set_nav_state_offboard(false);
         }
         if(msg->arming_state == px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED) {
             fsm_.set_arm_state_armed(true);
+        } else {
+            fsm_.set_arm_state_armed(false);
         }
     }
 
     void on_ack(px4_msgs::msg::VehicleCommandAck::SharedPtr msg) {
-        if((msg->command == 176 || msg->command == 400 || msg->command == 21) && msg->result == 0 && msg->target_system == 1) {
+        if((msg->command == px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE || 
+            msg->command == px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM ||
+            msg->command == px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND) 
+            && msg->result == 0 && msg->target_system == 1) {
             fsm_.set_command_acceptance_status(true);
         }
         else {
@@ -165,7 +172,8 @@ private:
                 publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_NAV_LAND);
         }
 
-        if(fsm_.get_current_state() == DroneState::LAND) {
+        if(fsm_.get_current_state() == DroneState::LANDED) {
+            //Comportement a determiner
         }
 
         fsm_.changer_etat();

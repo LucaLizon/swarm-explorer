@@ -86,12 +86,21 @@ private:
     }
 
     void on_status(px4_msgs::msg::VehicleStatus::SharedPtr msg) {
-        fsm_.set_nav_state(msg->nav_state);
-        fsm_.set_arm_state(msg->arming_state);
+        if(msg->nav_state == px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD) {
+            fsm_.set_nav_state_offboard(true);
+        }
+        if(msg->arming_state == px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED) {
+            fsm_.set_arm_state_armed(true);
+        }
     }
 
     void on_ack(px4_msgs::msg::VehicleCommandAck::SharedPtr msg) {
-        fsm_.set_command_acceptance_status(msg->result);
+        if((msg->command == 176 || msg->command == 400 || msg->command == 21) && msg->result == 0 && msg->target_system == 1) {
+            fsm_.set_command_acceptance_status(true);
+        }
+        else {
+            fsm_.set_command_acceptance_status(false);
+        }
     }
 
     void on_land_detection(px4_msgs::msg::VehicleLandDetected::SharedPtr msg) {

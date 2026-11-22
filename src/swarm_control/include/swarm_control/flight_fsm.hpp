@@ -1,7 +1,7 @@
 #pragma once // VITAL
 #include <stdint.h>
 
-enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, CORNER4, LAND};
+enum class DroneState {MESSAGING, COMMAND1, COMMAND2, CORNER1, CORNER2, CORNER3, CORNER4, LAND, LANDED};
 enum class PonctualEvent{NONE, SENDCOMMAND1, SENDCOMMAND2, SENDLAND};
 
 class FSM {
@@ -17,10 +17,10 @@ private:
     bool xy_valid_;
     bool z_valid_;
 
-    uint8_t nav_state_;
-    uint8_t arm_state_;
+    bool nav_state_offboard_;
+    bool arm_state_armed_;
 
-    uint8_t command_acceptance_status_;
+    bool command_acceptance_status_;
 
     bool landing_confirmed_;
 
@@ -40,9 +40,9 @@ public:
 
     PonctualEvent get_one_shot_event_() {return one_shot_event_;}
 
-    void set_nav_state(uint8_t a) {nav_state_ = a;}
-    void set_arm_state(uint8_t b) {arm_state_ = b;}
-    void set_command_acceptance_status(uint8_t c) {command_acceptance_status_ = c;}
+    void set_nav_state_offboard(bool a) {nav_state_offboard_ = a;}
+    void set_arm_state_armed(bool b) {arm_state_armed_ = b;}
+    void set_command_acceptance_status(bool c) {command_acceptance_status_ = c;}
     void set_landing_confirmed(bool d) {landing_confirmed_ = d;}
     void set_not_ready_for_offboard_mode_(bool e) {not_ready_for_offboard_mode_ = e;}
 
@@ -54,4 +54,5 @@ public:
     void change_from_CORNER2();
     void change_from_CORNER3();
     void change_from_CORNER4();
+    void change_from_LAND();
 };

@@ -13,8 +13,9 @@ void FSM::set_xyz_xyz_valid(float a, float b, float c, bool d, bool e) {
 void FSM::changer_etat() {
     counter_ ++;
     if (comparison_current_state_ != current_state_) {
-        counter_ == 0;
+        counter_ = 0;
         command_acceptance_status_ = false;
+        comparison_current_state_ = current_state_;
     }
     switch(current_state_) {
         

@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'telemetry = swarm_monitor.telemetry_node:main',
         ],
     },
 )

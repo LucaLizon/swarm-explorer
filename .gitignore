@@ -3,3 +3,5 @@ install/
 log/
 src/external/
 .vscode/
+__pycache__/
+*.pyc
